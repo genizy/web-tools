@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>obfuscate</title>
+    <script>
+        function obfuscate() {
+            let inputText = document.getElementById("inputText").value;
+            let obfuscated = "";
+            try {
+                let url = new URL(inputText);
+                
+                function hexEncode(str) {
+                    return str.split('').map(char => "%" + char.charCodeAt(0).toString(16)).join('');
+                }
+                
+                let obfuscatedPathname = hexEncode(url.pathname).replaceAll("%2f", "/");
+                let obfuscatedSearch = url.search.replace(/([?&])([^=&]+)=([^&]*)/g, (match, p1, p2, p3) => p1 + hexEncode(p2) + "=" + hexEncode(p3));
+                
+                obfuscated = url.protocol + "//" + url.hostname + obfuscatedPathname + obfuscatedSearch;
+            } catch (error) {
+                obfuscated = "Invalid url";
+            }
+            document.getElementById("output").innerText = obfuscated;
+        }
+
+        function copy() {
+            let outputText = document.getElementById("output").innerText;
+            navigator.clipboard.writeText(outputText).then(() => {
+                alert("copied");
+            }).catch(err => {
+                alert("Error: " + err);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>obfuscate</h1>
+    <p>Input text to obfuscate:</p>
+    <input type="text" id="inputText" placeholder="https://google.com">
+    <button onclick="obfuscate()">obfuscate</button>
+    <p>output:</p>
+    <code id="output"></code>
+    <br>
+    <button onclick="copy()">copy</button>
+</body>
+</html>
