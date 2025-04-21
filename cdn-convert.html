@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Convert CDN URL</title>
+    <script>
+        function convert() {
+            let inputText = document.getElementById("inputText").value.trim();
+            let output = "";
+
+            try {
+                let url = new URL(inputText);
+                let pathParts = url.pathname.split('/').filter(part => part);
+
+                if (url.hostname.includes("githack.com")) {
+                    if (pathParts.length >= 4) {
+                        let user = pathParts[0];
+                        let repo = pathParts[1];
+                        let commit = pathParts[2];
+                        let rest = pathParts.slice(3).join('/');
+                        output = `https://cdn.jsdelivr.net/gh/${user}/${repo}@${commit}/${rest}`;
+                    } else {
+                        output = "Invalid Githack URL format";
+                    }
+
+                } else if (url.hostname.includes("jsdelivr.net")) {
+                    let match = inputText.match(/\/gh\/([^/]+)\/([^@]+)@([^/]+)\/(.+)/);
+                    if (match) {
+                        let [, user, repo, commit, rest] = match;
+                        output = `https://rawcdn.githack.com/${user}/${repo}/${commit}/${rest}`;
+                    } else {
+                        output = "Invalid jsDelivr URL format";
+                    }
+                } else {
+                    output = "URL is not Githack or jsDelivr";
+                }
+
+            } catch (e) {
+                output = "Invalid URL";
+            }
+
+            document.getElementById("output").innerText = output;
+        }
+
+        function copy() {
+            let outputText = document.getElementById("output").innerText;
+            navigator.clipboard.writeText(outputText).then(() => {
+                alert("copied");
+            }).catch(err => {
+                alert("Error: " + err);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Convert CDN URL</h1>
+    <p>Input Githack or jsDelivr URL:</p>
+    <input type="text" id="inputText" placeholder="Paste URL here" style="width: 100%;">
+    <button onclick="convert()">convert</button>
+    <p>output:</p>
+    <code id="output"></code>
+    <br>
+    <button onclick="copy()">copy</button>
+</body>
+</html>
